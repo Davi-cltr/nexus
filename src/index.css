@@ -1,0 +1,357 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --color-space: #03040b;
+  --color-ink: #eef0f7;
+  --color-ink-2: rgb(226 230 242 / 0.74);
+  --color-ink-3: rgb(206 212 230 / 0.52);
+  --color-line: rgb(255 255 255 / 0.09);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  --acc: #b9c2ff;
+  --pr: 0px;
+  --pl: 0px;
+  color-scheme: dark;
+  background: var(--color-space);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transition: --acc 0.8s;
+}
+
+@property --acc {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #b9c2ff;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--acc) 45%, transparent);
+  color: #fff;
+}
+
+/* foco sempre visível para quem navega pelo teclado (camada base: componentes podem ajustar) */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--acc);
+    outline-offset: 2px;
+  }
+}
+
+/* componentes ficam numa camada própria: as classes utilitárias do Tailwind podem sobrescrevê-los */
+@layer components {
+  .nx-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .nx-labels {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* rótulos das estrelas-ideia (posicionados pelo motor 3D a cada quadro) */
+  .nx-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    height: 22px;
+    line-height: 22px;
+    white-space: nowrap;
+    pointer-events: none;
+    will-change: transform, opacity;
+    transition: opacity 0.25s;
+    font-size: 12px;
+    font-weight: 450;
+    letter-spacing: 0.005em;
+    color: rgb(232 236 248 / 0.8);
+    text-shadow:
+      0 0 10px rgb(3 4 11 / 0.95),
+      0 1px 2px rgb(3 4 11 / 0.9);
+  }
+  .nx-label small {
+    display: none;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in oklab, var(--c) 70%, white 30%);
+    opacity: 0.85;
+  }
+  .nx-label[data-strong='1'] {
+    color: #fff;
+    font-weight: 560;
+    font-size: 12.5px;
+  }
+  .nx-label[data-strong='1'] small {
+    display: inline;
+  }
+  .nx-label[data-hover='1'] b {
+    text-decoration: underline;
+    text-decoration-color: var(--c);
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1.5px;
+  }
+  .nx-label b {
+    font-weight: inherit;
+  }
+
+  .nx-galaxy-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 4px 10px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: color-mix(in oklab, var(--c) 78%, white 22%);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 17px;
+    font-weight: 380;
+    font-variation-settings: 'opsz' 48;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    cursor: pointer;
+    will-change: transform, opacity;
+    transition:
+      opacity 0.3s,
+      background-color 0.2s,
+      color 0.2s;
+    text-shadow: 0 0 14px rgb(3 4 11 / 0.95);
+  }
+  .nx-galaxy-label:hover {
+    background: color-mix(in oklab, var(--c) 16%, transparent);
+    color: #fff;
+  }
+
+  /* vidro escuro dos painéis, com um fio de luz na cor da região */
+  .nx-glass {
+    position: relative;
+    background: linear-gradient(180deg, rgb(15 17 32 / 0.9), rgb(8 9 19 / 0.88));
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid var(--color-line);
+    border-radius: 18px;
+    box-shadow:
+      0 24px 60px -24px rgb(0 0 0 / 0.75),
+      inset 0 1px 0 rgb(255 255 255 / 0.05);
+  }
+  .nx-glass::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    top: -1px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--acc) 80%, white 20%), transparent);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .nx-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    color: var(--color-ink-2);
+    font-size: 13.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition:
+      background-color 0.2s,
+      color 0.2s,
+      border-color 0.2s,
+      transform 0.15s var(--ease-out-expo);
+    cursor: pointer;
+    user-select: none;
+  }
+  .nx-btn:hover {
+    background: rgb(255 255 255 / 0.07);
+    color: #fff;
+  }
+  .nx-btn:active {
+    transform: scale(0.97);
+  }
+  .nx-btn[aria-pressed='true'],
+  .nx-btn[aria-expanded='true'] {
+    background: color-mix(in oklab, var(--acc) 16%, transparent);
+    border-color: color-mix(in oklab, var(--acc) 35%, transparent);
+    color: #fff;
+  }
+  .nx-btn-icon {
+    width: 38px;
+    padding: 0;
+    justify-content: center;
+  }
+  .nx-btn-primary {
+    background: color-mix(in oklab, var(--acc) 88%, white 12%);
+    color: #07081a;
+    font-weight: 600;
+  }
+  .nx-btn-primary:hover {
+    background: color-mix(in oklab, var(--acc) 70%, white 30%);
+    color: #07081a;
+  }
+
+  .nx-kbd {
+    display: inline-grid;
+    place-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 6px;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    background: rgb(255 255 255 / 0.04);
+    color: var(--color-ink-3);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .nx-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    min-height: 32px;
+    padding: 5px 12px 5px 10px;
+    border-radius: 999px;
+    border: 1px solid rgb(255 255 255 / 0.08);
+    background: rgb(255 255 255 / 0.035);
+    color: var(--color-ink);
+    font-size: 13px;
+    text-align: left;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
+    cursor: pointer;
+  }
+  .nx-chip:hover {
+    background: color-mix(in oklab, var(--c, var(--acc)) 14%, transparent);
+    border-color: color-mix(in oklab, var(--c, var(--acc)) 40%, transparent);
+  }
+
+  .nx-dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--c, var(--acc));
+    box-shadow: 0 0 10px var(--c, var(--acc));
+  }
+
+  .nx-scroll {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.16) transparent;
+    overscroll-behavior: contain;
+  }
+
+  .nx-input {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    outline: none;
+    color: #fff;
+    font-size: 16px;
+  }
+  .nx-input:focus-visible {
+    outline: none;
+  }
+  .nx-input::placeholder {
+    color: var(--color-ink-3);
+  }
+
+  /* linha do tempo: o controle nativo continua acessível, só a aparência muda */
+  .nx-range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 28px;
+    background: transparent;
+    cursor: pointer;
+    margin: 0;
+  }
+  .nx-range::-webkit-slider-runnable-track {
+    height: 28px;
+    background: transparent;
+  }
+  .nx-range::-moz-range-track {
+    height: 28px;
+    background: transparent;
+  }
+  .nx-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    margin-top: 6px;
+    border-radius: 999px;
+    background: #fff;
+    border: 3px solid var(--acc);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--acc) 22%, transparent), 0 0 18px var(--acc);
+  }
+  .nx-range::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: #fff;
+    border: 3px solid var(--acc);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--acc) 22%, transparent), 0 0 18px var(--acc);
+  }
+  .nx-range:focus-visible {
+    outline: none;
+  }
+  .nx-range:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+  }
+}
+
+@keyframes nx-progresso {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
